@@ -1,0 +1,89 @@
+.App {
+  text-align: center;
+}
+
+.App-logo {
+  height: 40vmin;
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .App-logo {
+    animation: App-logo-spin infinite 20s linear;
+  }
+}
+
+.App-header {
+  background-color: #282c34;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(10px + 2vmin);
+  color: white;
+}
+
+.App-link {
+  color: #61dafb;
+}
+
+@keyframes App-logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+#navCheckout{
+  background:#2f9c76;
+  width: auto;
+  height: auto;
+  right:0px;
+  color:white;
+  border-radius: 4px;
+}
+.navColors{
+  opacity: 70%;
+  background-color: #feda75;
+
+
+}
+.pageBG{
+  
+  background-color: white;
+}
+.cardBG{
+ background-color:  #2f9c76
+ ;
+}
+.search-container {
+  margin-top: 20px;
+}
+.w{
+  color: white;
+}
+button.btn-custom{
+  background-color: #F4F0BB;
+  border-color: #F4F0BB;
+  color: black;
+
+}
+button.btn-custom:hover {
+  background-color: #ece8b1;
+  border-color: #ece8b1;
+}
+button.searchCstm{
+  background-color: #9B97B2;
+  border-color: #9B97B2;
+}
+button.searchCstm:hover{
+  background-color: #8e8aa4;
+  border-color: #8e8aa4;
+}
+.searchBar{
+  background-color: #4A9EBA;
+  color: #4A9EBA;
+}
+
