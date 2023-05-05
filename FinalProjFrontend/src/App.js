@@ -8,8 +8,11 @@ const Navbar = ({ cartItemsCount, onViewChange }) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light"
          style={{backgroundColor: "#ff6150"}}>
-      <div className="container-fluid">
-        <a className="navbar-brand" href="/" style={{color: "white"}}>My Store</a>
+     
+     <div className="container-fluid">
+        <a className="navbar-brand" href="/" style={{color: "white"}} 
+        onClick={()=> onViewChange('home')}>  My Store  </a>
+        
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
@@ -18,6 +21,7 @@ const Navbar = ({ cartItemsCount, onViewChange }) => {
                  style={{color: "white"}}>Products</a>
             </li>
           </ul>
+         
           <ul className="navbar-nav">
             <li className="nav-item">
               <a className="nav-link" href="#" id="navCheckout"
@@ -25,11 +29,23 @@ const Navbar = ({ cartItemsCount, onViewChange }) => {
                  style={{color: "white"}}>Checkout</a>
             </li>
           </ul>
+        
         </div>
       </div>
     </nav>
   );
 };
+
+
+
+const Home = () => {
+  return (
+    <div>
+      <h1>Welcome to My Store!</h1>
+      <p>This is the home page of our ecommerce app.</p>
+    </div>
+  )
+}
 
 const ProductGrid = ({ onAddToCart }) => {
   const [quantities, setQuantities] = useState({});
@@ -379,54 +395,50 @@ const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
     </div>
   )
 }
-const App = () => {
-  const [view, setView] = useState('products');
+function App() {
+  const [view, setView] = useState('home');
   const [cartItems, setCartItems] = useState([]);
-  const [userInfo, setUserInfo] = useState({})
 
-
-  const handleUserChange = (event) => {
-    setUserInfo({ ...userInfo, [event.target.id]:event.target.value});
-    console.log(userInfo);
-  };
-
-  const handleViewChange = (newView) => {
-    setView(newView);
-  };
-  const handleAddToCart = (newItem) => {
-    const existingItem = cartItems.findIndex((item) => item.id === newItem.id);
-    if (existingItem !== -1) {
-      const updatedCartItems = [...cartItems];
-      updatedCartItems[existingItem].quantity += newItem.quantity;
-      setCartItems(updatedCartItems);
+  const addToCart = (product) => {
+    const existingCartItem = cartItems.find((item) => item.id === product._id);
+    if (existingCartItem) {
+      setCartItems(
+        cartItems.map((item) =>
+          item.id === product._id
+            ? { ...item, quantity: item.quantity + product.quantity }
+            : item
+        )
+      );
     } else {
-      setCartItems([...cartItems, newItem]);
+      setCartItems([...cartItems, product]);
     }
   };
-  
 
-  const handleRemoveFromCart = (productId) => {
-    const newCartItems = cartItems.filter((item) => item.id !== productId);
-    setCartItems(newCartItems);
+  const removeFromCart = (productId) => {
+    setCartItems(cartItems.filter((item) => item.id !== productId));
   };
 
-  const calculateTotal = () => {
-    const total = cartItems.reduce((total, item) => (total + item.price * item.quantity * 1.07), 0);
-    return total.toFixed(2);
+  const getView = () => {
+    switch (view) {
+      case 'home':
+        return <Home />;
+      case 'products':
+        return <ProductGrid onAddToCart={addToCart} />;
+      case 'cart':
+        const total = cartItems.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        return <ShoppingCart cartItems={cartItems} onRemoveFromCart={removeFromCart} total={total} />;
+      default:
+        return <Home />;
+    }
   };
-  
-  console.log(userInfo);
+
   return (
-    <div class="pageBG">
-      <Navbar onViewChange={handleViewChange} cartItems={cartItems} />
-      <div className="container">
-        {view === 'products' && <ProductGrid onAddToCart={handleAddToCart} />}
-        {view === 'cart' && <Cart cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} total={calculateTotal()} onViewChange={handleViewChange} handleFormChange={handleUserChange} />}
-        {view === 'confirmation' && <Confimation cartItems={cartItems} total={calculateTotal()} userInfo={userInfo} onViewChange={handleViewChange} />} 
-      </div>
+    <div>
+      <Navbar cartItemsCount={cartItems.length} onViewChange={setView} />
+      <div className="container mt-4">{getView()}</div>
     </div>
   );
-};
-
+}
 
 export default App;
+
