@@ -1,8 +1,8 @@
 import logo from './logo.svg';
 import './App.css';
-import { Products } from './products';
+// import { Products } from './products';
 import 'bootstrap/dist/css/bootstrap.css';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 const Navbar = ({ cartItemsCount, onViewChange }) => {
   return (
@@ -31,12 +31,17 @@ const Navbar = ({ cartItemsCount, onViewChange }) => {
   );
 };
 
-
-
-
 const ProductGrid = ({ onAddToCart }) => {
   const [quantities, setQuantities] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
+  const [products, setProducts] = useState([]);
+
+  useEffect(() => {
+    fetch('http://localhost:4000/')
+      .then(res => res.json())
+      .then(data => setProducts(data))
+      .catch(err => console.error(err));
+  }, []);
 
   const handleIncrement = (productId) => {
     setQuantities({
@@ -54,9 +59,10 @@ const ProductGrid = ({ onAddToCart }) => {
     setQuantities(newQuantities);
   };
 
-  const filteredProducts = Products.filter((product) => {
+  const filteredProducts = products.filter((product) => {
     return product.title.toLowerCase().includes(searchTerm.toLowerCase());
   });
+  
 
   return (
     <div>
@@ -73,7 +79,7 @@ const ProductGrid = ({ onAddToCart }) => {
 
       <div className="row row-cols-1 row-cols-md-3 g-4">
         {filteredProducts.map((product) => (
-          <div className="col" key={product.id}>
+          <div className="col" key={product._id}>
             <div className="card">
               <img src={product.image} className="card-img-top" alt={product.title} />
               <div className="cardBG">
@@ -83,12 +89,12 @@ const ProductGrid = ({ onAddToCart }) => {
                 <p className="card-text w"><small className="text-muted w">{product.rating.rate} ({product.rating.count})</small></p>
                 <div className="d-flex align-items-center justify-content-between">
                   <div>
-                    <button className="btn btn-primary me-2 btn-custom" onClick={() => onAddToCart({ ...product, quantity: quantities[product.id] || 0 })}>Add to Cart</button>
-                    <span className="fs-5">{quantities[product.id] || 0}</span>
+                    <button className="btn btn-primary me-2 btn-custom" onClick={() => onAddToCart({ ...product, quantity: quantities[product._id] || 0 })}>Add to Cart</button>
+                    <span className="fs-5">{quantities[product._id] || 0}</span>
                   </div>
                   <div>
-                    <button className="btn btn-secondary me-2" onClick={() => handleDecrement(product.id)}>-</button>
-                    <button className="btn btn-secondary" onClick={() => handleIncrement(product.id)}>+</button>
+                    <button className="btn btn-secondary me-2" onClick={() => handleDecrement(product._id)}>-</button>
+                    <button className="btn btn-secondary" onClick={() => handleIncrement(product._id)}>+</button>
                   </div>
                 </div>
               </div>
@@ -99,6 +105,7 @@ const ProductGrid = ({ onAddToCart }) => {
     </div>
   );
 };
+
 
 const ShoppingCart = ({ cartItems, onRemoveFromCart, total }) => {
   return (

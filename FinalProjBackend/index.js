@@ -23,10 +23,10 @@ const host = "localhost";
 
 app.get("/", async (req, resp) => {
   const query = {};
-  const allProducts = await Product.find(query);
-  console.log(allProducts);
+  const products = await Product.find(query);
+  console.log(products);
   resp.set("Access-Control-Allow-Origin", "*");
-  resp.send(allProducts);
+  resp.send(products);
 });
 
 app.get("/:id", async (req, resp) => {
@@ -75,6 +75,7 @@ app.delete("/delete", async (req, res) => {
   try {
     const query = { _id: req.body._id };
     await Product.deleteOne(query);
+    "Z:\Desktop\ClassActivities319\gitrepo\FinalProject\FinalProjFrontend\src\App.js"
     const messageResponse = {
       message: `Product ${req.body._id} deleted`,
     };
@@ -96,5 +97,13 @@ app.put("/edite/:id", async (req, res) =>{
     } catch (err) {
       console.log("Error while updating the product:" + err);
       res.status(500).send("Error while updating the product");
+    }
+  });
+  app.use('/images', (req, res, next) => {
+    try {
+      express.static(path.join(__dirname, 'images'))(req, res, next);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send('Internal server error');
     }
   });
