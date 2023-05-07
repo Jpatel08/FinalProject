@@ -2,10 +2,15 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const { Product } = require("./dataSchema"); // import the Product model
+const { CustomerInfo } = require("./customerSchema");
+// ...
 const app = express();
 
 const path = require('path');
+const bodyParser = require("body-parser");
 app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use(bodyParser.json());
+
 
 
 app.use(express.json());
@@ -106,4 +111,27 @@ app.put("/edite/:id", async (req, res) =>{
       console.error(err);
       res.status(500).send('Internal server error');
     }
+  });
+
+  app.post('/customerinfo', (req, res) => {
+
+    const customerInfo = new CustomerInfo({
+      name: req.body.name,
+      email: req.body.email,
+      cardNum: req.body.cardNum,
+      address1: req.body.address1,
+      city: req.body.city,
+      state: req.body.state,
+      zipCode: req.body.zipCode,
+    });
+    
+    customerInfo.save()
+      .then((result) => {
+        console.log('Customer info saved:', result);
+        res.send(result);
+      })
+      .catch((error) => {
+        console.error('Error saving customer info:', error);
+        res.status(500).send('Error saving customer info');
+      });
   });

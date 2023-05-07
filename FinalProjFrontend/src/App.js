@@ -1,6 +1,5 @@
 import logo from './logo.svg';
 import './App.css';
-// import { Products } from './products';
 import 'bootstrap/dist/css/bootstrap.css';
 import React, { useState, useEffect } from 'react';
 
@@ -236,7 +235,7 @@ const Cart = ({ cartItems, onRemoveFromCart, total, onViewChange, handleFormChan
           <div className="total-price">Total: ${total}</div>
           <div>
             <form id="form">
-
+                <br></br>
             <><h1>Payment Information</h1><div id="liveAlertPlaceholder"></div><form class="row g-3" id="checkout-form">
       <div class="col-md-6">
         <label for="inputName" class="form-label">
@@ -346,8 +345,44 @@ const Cart = ({ cartItems, onRemoveFromCart, total, onViewChange, handleFormChan
 };
 
 
+
 const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
-  return(
+  function submit(userInfo){
+    userInfo.preventDefault();
+  
+    const formData = {
+      name: userInfo.inputName,
+      email: userInfo.inputEmail4,
+      cardNum: userInfo.inputCard,
+      address1: userInfo.inputAddress,
+      city: userInfo.inputState,
+      state: userInfo.inputState,
+      zipCode: userInfo.inputAddress,
+    };
+  
+    fetch("http://localhost:4000/customerinfo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(formData),
+    })
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+        return response.json();
+      })
+      .then((data) => {
+        console.log("Customer info added:", data);
+        onViewChange("confirmation");
+      })
+      .catch((error) => {
+        console.error("Error adding customer info:", error);
+        alert("Error adding customer info, please try again.");
+      });
+  }
+  return( 
     <div className="container mt-3">
       <h1>Thank you! Your order has been recieved!</h1>
       <br></br>
@@ -382,6 +417,7 @@ const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
           {" "}
           <i class="bi-bag-check"></i> Return
         </button></a>
+        <button onClick={submit}>Save Order</button>
       </div>
       </>
     </div>

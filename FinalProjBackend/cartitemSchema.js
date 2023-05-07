@@ -12,8 +12,8 @@ const ReactFormDataSchema = new mongoose.Schema(
   { collection: "Cart" }
 );
 
-const Product = mongoose.model('Product', ReactFormDataSchema);
+const CartItems = mongoose.model('Product', ReactFormDataSchema);
 
 module.exports = {
-  cartItem,
+  CartItems,
 };
