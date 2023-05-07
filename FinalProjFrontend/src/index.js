@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
-import { products } from './products';
-import { Categories } from "./categories";
+
 
 import reportWebVitals from './reportWebVitals';
 
