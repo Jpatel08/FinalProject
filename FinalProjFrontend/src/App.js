@@ -3,13 +3,18 @@ import './App.css';
 // import { Products } from './products';
 import 'bootstrap/dist/css/bootstrap.css';
 import React, { useState, useEffect } from 'react';
+//import axios from 'axios';
+
 
 const Navbar = ({ cartItemsCount, onViewChange }) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light"
          style={{backgroundColor: "#ff6150"}}>
-      <div className="container-fluid">
-        <a className="navbar-brand" href="/" style={{color: "white"}}>My Store</a>
+     
+     <div className="container-fluid">
+        <a className="navbar-brand" href="/" style={{color: "white"}} 
+        onClick={()=> onViewChange('home')}>  My Store  </a>
+        
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
@@ -18,6 +23,7 @@ const Navbar = ({ cartItemsCount, onViewChange }) => {
                  style={{color: "white"}}>Products</a>
             </li>
           </ul>
+         
           <ul className="navbar-nav">
             <li className="nav-item">
               <a className="nav-link" href="#" id="navCheckout"
@@ -25,6 +31,7 @@ const Navbar = ({ cartItemsCount, onViewChange }) => {
                  style={{color: "white"}}>Checkout</a>
             </li>
           </ul>
+        
         </div>
       </div>
     </nav>
@@ -62,6 +69,26 @@ const ProductGrid = ({ onAddToCart }) => {
   const filteredProducts = products.filter((product) => {
     return product.title.toLowerCase().includes(searchTerm.toLowerCase());
   });
+
+  const deleteItem = (productid) => {
+    console.log("Deleting product:", productid);
+    console.log(productid);
+    console.log("yo");
+    fetch("http://localhost:4000/delete", {
+      method: "DELETE",
+      headers: {"Content-Type": "application/json" },
+      body: JSON.stringify({ _id: productid}),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Delete a product complted :", productid);
+        console.log(data);
+        if (data) {
+          const value = Object.values(data);
+          alert(value);
+        }
+      });
+  }
   
 
   return (
@@ -91,6 +118,10 @@ const ProductGrid = ({ onAddToCart }) => {
                   <div>
                     <button className="btn btn-primary me-2 btn-custom" onClick={() => onAddToCart({ ...product, quantity: quantities[product._id] || 0 })}>Add to Cart</button>
                     <span className="fs-5">{quantities[product._id] || 0}</span>
+                  </div>
+                  <div>
+
+                    <button className="btn btn-danger" onClick={() => deleteItem(product._id)}>Delete</button>
                   </div>
                   <div>
                     <button className="btn btn-secondary me-2" onClick={() => handleDecrement(product._id)}>-</button>
@@ -344,7 +375,9 @@ const Cart = ({ cartItems, onRemoveFromCart, total, onViewChange, handleFormChan
 const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
   return(
     <div className="container mt-3">
-      <h1>Confimation</h1>
+      <h1>Thank you! Your order has been recieved!</h1>
+      <br></br>
+      <h3 style={{textAlign:'center'}}>{userInfo.inputName}'s Order:</h3>
       <>
       <table className="table">
       <thead>
@@ -365,10 +398,11 @@ const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
         </tr>
       ))}
       </table>
-      <div className="total-price"><b>Total:</b> ${total}</div>
+      <div className="total-price" style={{fontSize:24}}><b>Total:</b> ${total}</div>
+      <br></br>
       <div>
-        <h4>User Info</h4>
         <>
+        <h2>Shipping Info</h2>
         <p>Full Name:{userInfo.inputName} <br></br> Email Address: {userInfo.inputEmail4} <br></br>Card Info: {userInfo.inputCard} <br></br>Given Address: {userInfo.inputAddress}</p></>
         <a href="/"><button type="submit" class="btn btn-success" onClick={() => {onViewChange('products')}}>
           {" "}
@@ -400,7 +434,28 @@ const App = () => {
       updatedCartItems[existingItem].quantity += newItem.quantity;
       setCartItems(updatedCartItems);
     } else {
-      setCartItems([...cartItems, newItem]);
+      fetch("http://localhost:4000/cart", {
+        method: "POST",
+        body: JSON.stringify(newItem)
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Post a new product completed");
+          console.log(data);
+
+          setCartItems([...cartItems, data.cartItems]);
+        })
+        .catch(error => {
+          console.log(error);
+        })
+
+      // axios.post('/api/cart', newItem)
+      //   .then(response => {
+      //     setCartItems([...cartItems, response.data.cartItems]);
+      //   })
+      //   .catch(error => {
+      //     console.log(error);
+      //   })
     }
   };
   

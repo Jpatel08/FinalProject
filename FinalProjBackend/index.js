@@ -48,8 +48,8 @@ app.post("/insert", async (req, res) => {
   const pprice = req.body.price;
   const pdescription = req.body.description;
   const pcategory = req.body.category;
-  const pimage = req.body.image;
   const prate = req.body.rating.rate;
+  const pimage = req.body.image;
   const pcount = req.body.rating.count;
 
   const formData = new Product({
@@ -58,8 +58,8 @@ app.post("/insert", async (req, res) => {
     price: pprice,
     description: pdescription,
     category: pcategory,
-    image: pimage,
     rating: { rate: prate, count: pcount },
+    image: pimage,
   });
   try {
     await Product.create(formData);
@@ -107,3 +107,32 @@ app.put("/edite/:id", async (req, res) =>{
       res.status(500).send('Internal server error');
     }
   });
+
+app.post("/cart", async (req, res) =>{
+  const newCartItem = req.body;
+
+
+});
+
+// const CartItem = require('../models/cartItem');
+// app.post('/cart', async (req, res) =>{
+//   const { id, title, price, description, category, rating, image} = req.body;
+
+//   const newCartItem = new CartItem({
+//     id: id,
+//     title: title,
+//     price: price,
+//     description: description,
+//     category: category,
+//     rating: rating,
+//     image: image
+//   });
+
+//   newCartItem.save()
+//     .then(result =>{
+//       res.status(201).json({message: 'Cart item added successfully', cartItem: result});
+//     })
+//     .catch(err => {
+//       res.status(500).json({ error: err});
+//     });
+// });
