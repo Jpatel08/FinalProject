@@ -72,7 +72,6 @@ const ProductGrid = ({ onAddToCart }) => {
   const deleteItem = (productid) => {
     console.log("Deleting product:", productid);
     console.log(productid);
-    console.log("yo");
     fetch("http://localhost:4000/delete", {
       method: "DELETE",
       headers: {"Content-Type": "application/json" },
@@ -80,7 +79,7 @@ const ProductGrid = ({ onAddToCart }) => {
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log("Delete a product complted :", productid);
+        console.log("Delete a product completed :", productid);
         console.log(data);
         if (data) {
           const value = Object.values(data);
@@ -469,21 +468,22 @@ const App = () => {
       const updatedCartItems = [...cartItems];
       updatedCartItems[existingItem].quantity += newItem.quantity;
       setCartItems(updatedCartItems);
-    } else {
-      fetch("http://localhost:4000/cart", {
-        method: "POST",
-        body: JSON.stringify(newItem)
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Post a new product completed");
-          console.log(data);
+     } else {
+      setCartItems([...cartItems, newItem]);
+    //   fetch("http://localhost:4000/cart", {
+    //     method: "POST",
+    //     body: JSON.stringify(newItem)
+    //   })
+    //     .then((response) => response.json())
+    //     .then((data) => {
+    //       console.log("Post a new product completed");
+    //       console.log(data);
 
-          setCartItems([...cartItems, data.cartItems]);
-        })
-        .catch(error => {
-          console.log(error);
-        })
+    //       setCartItems([...cartItems, data.cartItems]);
+    //     })
+    //     .catch(error => {
+    //       console.log(error);
+    //     })
 
       // axios.post('/api/cart', newItem)
       //   .then(response => {
