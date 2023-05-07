@@ -53,8 +53,8 @@ app.post("/insert", async (req, res) => {
   const pprice = req.body.price;
   const pdescription = req.body.description;
   const pcategory = req.body.category;
-  const pimage = req.body.image;
   const prate = req.body.rating.rate;
+  const pimage = req.body.image;
   const pcount = req.body.rating.count;
 
   const formData = new Product({
@@ -63,8 +63,8 @@ app.post("/insert", async (req, res) => {
     price: pprice,
     description: pdescription,
     category: pcategory,
-    image: pimage,
     rating: { rate: prate, count: pcount },
+    image: pimage,
   });
   try {
     await Product.create(formData);

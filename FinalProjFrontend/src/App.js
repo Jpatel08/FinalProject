@@ -2,6 +2,8 @@ import logo from './logo.svg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import React, { useState, useEffect } from 'react';
+//import axios from 'axios';
+
 
 const Navbar = ({ cartItemsCount, onViewChange }) => {
   return (
@@ -66,6 +68,26 @@ const ProductGrid = ({ onAddToCart }) => {
   const filteredProducts = products.filter((product) => {
     return product.title.toLowerCase().includes(searchTerm.toLowerCase());
   });
+
+  const deleteItem = (productid) => {
+    console.log("Deleting product:", productid);
+    console.log(productid);
+    console.log("yo");
+    fetch("http://localhost:4000/delete", {
+      method: "DELETE",
+      headers: {"Content-Type": "application/json" },
+      body: JSON.stringify({ _id: productid}),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Delete a product complted :", productid);
+        console.log(data);
+        if (data) {
+          const value = Object.values(data);
+          alert(value);
+        }
+      });
+  }
   
 
   return (
@@ -95,6 +117,10 @@ const ProductGrid = ({ onAddToCart }) => {
                   <div>
                     <button className="btn btn-primary me-2 btn-custom" onClick={() => onAddToCart({ ...product, quantity: quantities[product._id] || 0 })}>Add to Cart</button>
                     <span className="fs-5">{quantities[product._id] || 0}</span>
+                  </div>
+                  <div>
+
+                    <button className="btn btn-danger" onClick={() => deleteItem(product._id)}>Delete</button>
                   </div>
                   <div>
                     <button className="btn btn-secondary me-2" onClick={() => handleDecrement(product._id)}>-</button>
@@ -444,7 +470,28 @@ const App = () => {
       updatedCartItems[existingItem].quantity += newItem.quantity;
       setCartItems(updatedCartItems);
     } else {
-      setCartItems([...cartItems, newItem]);
+      fetch("http://localhost:4000/cart", {
+        method: "POST",
+        body: JSON.stringify(newItem)
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Post a new product completed");
+          console.log(data);
+
+          setCartItems([...cartItems, data.cartItems]);
+        })
+        .catch(error => {
+          console.log(error);
+        })
+
+      // axios.post('/api/cart', newItem)
+      //   .then(response => {
+      //     setCartItems([...cartItems, response.data.cartItems]);
+      //   })
+      //   .catch(error => {
+      //     console.log(error);
+      //   })
     }
   };
   
