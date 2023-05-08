@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
 //import axios from 'axios';
 
 
+
 const Navbar = ({ cartItemsCount, onViewChange }) => {
   return (
     <nav className="navbar navbar-expand-lg navbar-light" style={{ backgroundColor: "#ff6150" }}>
@@ -49,7 +50,7 @@ const Home = () => {
 };
 
 
-const ProductGrid = ({ onAddToCart }) => {
+const ProductGrid = ({ onAddToCart },cartItems) => {
   const [quantities, setQuantities] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState([]);
@@ -61,29 +62,46 @@ const ProductGrid = ({ onAddToCart }) => {
       .catch(err => console.error(err));
   }, []);
   const handleAddToCart = (product, quantity) => {
-    fetch('http://localhost:4000/Cart', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        "id":product._id,
-        "title": product.title,
-        "description":product.description,
-        "price": product.price,
-        "image":product.image,
-        "rating":product.rating,
-        "quantity": quantity,
-      })
-    })
+    fetch('http://localhost:4000/cart/all')
       .then(res => res.json())
       .then(data => {
-        console.log('Added to cart:', data);
-        // Optionally, you can update the local cart state as well
-        onAddToCart(product, quantity);
+        const cartItems = Array.isArray(data) ? data : [];
+        const existingCartItem = cartItems.find(item => item._id === product._id);
+        if (existingCartItem) {
+          const updatedCartItem = { ...existingCartItem, quantity: existingCartItem.quantity + quantity };
+          fetch(`http://localhost:4000/cart/update`, {
+            method: 'PUT',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedCartItem)
+          })
+            .then(res => res.json())
+            .catch(err => console.error(err));
+        } else {
+          fetch('http://localhost:4000/cart/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              "_id":product._id,
+              "title": product.title,
+              "description":product.description,
+              "price": product.price,
+              "image":product.image,
+              "rating":product.rating,
+              "quantity": quantity,
+            })
+          })
+            .then(res => res.json())
+            .catch(err => console.error(err));
+        }
       })
       .catch(err => console.error(err));
   };
+  
+  
   
   const handleIncrement = (productId) => {
     setQuantities({
@@ -156,10 +174,6 @@ const ProductGrid = ({ onAddToCart }) => {
                     <span className="fs-5">{quantities[product._id] || 0}</span>
                   </div>
                   <div>
-
-                    <button className="btn btn-danger" onClick={() => deleteItem(product._id)}>Delete</button>
-                  </div>
-                  <div>
                     <button className="btn btn-secondary me-2" onClick={() => handleDecrement(product._id)}>-</button>
                     <button className="btn btn-secondary" onClick={() => handleIncrement(product._id)}>+</button>
                   </div>
@@ -174,98 +188,81 @@ const ProductGrid = ({ onAddToCart }) => {
 };
 
 
-const ShoppingCart = ({ cartItems, onRemoveFromCart, total }) => {
-  return (
-    <div>
-      <h1>Shopping Cart</h1>
-      {cartItems.length > 0 ? (
-        <>
-          <table className="table">
-            <thead>
-              <tr>
-                <th scope="col">Product</th>
-                <th scope="col">Price</th>
-                <th scope="col">Quantity</th>
-                <th scope="col"></th>
-              </tr>
-            </thead>
-            <tbody>
-              {cartItems.map((item) => (
-                <tr key={item.id}>
-                  <td>{item.title}</td>
-                  <td>${item.price}</td>
-                  <td>{item.quantity}</td>
-                  <td>
-                    <button className="btn btn-danger" onClick={() => onRemoveFromCart(item.id)}>Remove</button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          <div className="total-price">Total: ${total}</div>
-        </>
-      ) : (
-        <p>Your cart is empty</p>
-      )}
-    </div>
-  );
-};
 
 
-const Cart = ({ cartItems, onRemoveFromCart, total, onViewChange, handleFormChange}) => {
 
-  // const addInfo = () => {
-  //   console.log(userInfo);
-  //   setUserInfo({...userInfo, fullName: document.getElementById('inputName').value});
-  //   console.log(userInfo);
-  //   console.log(document.getElementById('inputName').value);
-  //   setUserInfo({...userInfo, email: document.getElementById('inputEmail4').value});
-  //   console.log(document.getElementById('inputEmail4').value);
-  //   setUserInfo({ cardInfo: document.getElementById('inputCard').value});
-  //   console.log(document.getElementById('inputCard').value);
-  //   console.log(userInfo);
-  //   setUserInfo({...userInfo, address: document.getElementById('inputAddress').value + document.getElementById('inputAddress2').value});
-  //   console.log(document.getElementById('inputAddress').value + document.getElementById('inputAddress2').value)
-    
-  //   console.log('yo');
-  //   console.log(userInfo);
-  // }
+
+const Cart = ({ onRemoveFromCart, onViewChange, handleFormChange }) => {
+  const [cartItems, setCartItems] = useState([]);
+  const [total, setTotal] = useState(0);
+
+  useEffect(() => {
+    fetch('http://localhost:4000/cart/all')
+      .then(res => res.json())
+      .then(data => {
+        setCartItems(data);
+        const totalPrice = data.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        setTotal(totalPrice);
+      })
+      .catch(err => console.error(err));
+  })
+
+  const deleteFromCart = (productid) => {
+    console.log("Deleting product:", productid);
+    console.log(productid);
+    fetch("http://localhost:4000/cart/delete", {
+      method: "DELETE",
+      headers: {"Content-Type": "application/json" },
+      body: JSON.stringify({ _id: productid}),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        console.log("Delete a product completed :", productid);
+        console.log(data);
+        if (data) {
+          const value = Object.values(data);
+          alert(value);
+        }
+      });
+}
 
   // Form validation stuff
   let validate = function () {
     let val = true;
-    let email = document.getElementById('inputEmail4')
-    let name = document.getElementById('inputName')
-    let card = document.getElementById('inputCard')
-    let form = document.getElementById('form')
-    if (!email.value.match(/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9] {1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-    )) {
+    let email = document.getElementById("inputEmail4");
+    let name = document.getElementById("inputName");
+    let card = document.getElementById("inputCard");
+    let form = document.getElementById("form");
+    if (
+      !email.value.match(
+        /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9] {1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      )
+    ) {
       email.setAttribute("class", "form-control is-invalid");
       val = false;
-    }
-    else {
+    } else {
       email.setAttribute("class", "form-control is-valid");
     }
     if (name.value.length == 0) {
-      name.setAttribute("class", "form-control is-invalid")
-      val = false
-    }
-    else {
+      name.setAttribute("class", "form-control is-invalid");
+      val = false;
+    } else {
       name.setAttribute("class", "form-control is-valid");
     }
-    if (!card.value.match(/^[0-9]{4}\-[0-9]{4}\-[0-9]{4}\-[0-9]{4}$/)) {
-      card.setAttribute("class", "form-control is-invalid")
-      val = false
-    }
-    else {
+    if (
+      !card.value.match(/^[0-9]{4}\-[0-9]{4}\-[0-9]{4}\-[0-9]{4}$/)
+    ) {
+      card.setAttribute("class", "form-control is-invalid");
+      val = false;
+    } else {
       card.setAttribute("class", "form-control is-valid");
     }
     if (val) {
-      form.classList.add("collapse")
-      alert('You have made an order!', 'success')
+      form.classList.add("collapse");
+      alert("You have made an order!", "success");
     }
     return val;
-  }
+  };
 
 
   return (
@@ -289,7 +286,7 @@ const Cart = ({ cartItems, onRemoveFromCart, total, onViewChange, handleFormChan
                   <td>${item.price}</td>
                   <td>{item.quantity}</td>
                   <td>
-                    <button className="btn btn-danger" onClick={() => onRemoveFromCart(item.id)}>Remove</button>
+                    <button className="btn btn-danger" onClick={() => deleteFromCart(item._id)}>Remove</button>
                   </td>
                 </tr>
               ))}
@@ -410,46 +407,9 @@ const Cart = ({ cartItems, onRemoveFromCart, total, onViewChange, handleFormChan
 
 
 const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
-  function submit(userInfo){
-    userInfo.preventDefault();
-  
-    const formData = {
-      name: userInfo.inputName,
-      email: userInfo.inputEmail4,
-      cardNum: userInfo.inputCard,
-      address1: userInfo.inputAddress,
-      city: userInfo.inputState,
-      state: userInfo.inputState,
-      zipCode: userInfo.inputAddress,
-    };
-  
-    fetch("http://localhost:4000/customerinfo", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    })
-      .then((response) => {
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        return response.json();
-      })
-      .then((data) => {
-        console.log("Customer info added:", data);
-        onViewChange("confirmation");
-      })
-      .catch((error) => {
-        console.error("Error adding customer info:", error);
-        alert("Error adding customer info, please try again.");
-      });
-  }
-  return( 
+  return(
     <div className="container mt-3">
-      <h1>Thank you! Your order has been recieved!</h1>
-      <br></br>
-      <h3 style={{textAlign:'center'}}>{userInfo.inputName}'s Order:</h3>
+      <h1>Confimation</h1>
       <>
       <table className="table">
       <thead>
@@ -470,17 +430,15 @@ const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
         </tr>
       ))}
       </table>
-      <div className="total-price" style={{fontSize:24}}><b>Total:</b> ${total}</div>
-      <br></br>
+      <div className="total-price"><b>Total:</b> ${total}</div>
       <div>
+        <h4>User Info</h4>
         <>
-        <h2>Shipping Info</h2>
         <p>Full Name:{userInfo.inputName} <br></br> Email Address: {userInfo.inputEmail4} <br></br>Card Info: {userInfo.inputCard} <br></br>Given Address: {userInfo.inputAddress}</p></>
         <a href="/"><button type="submit" class="btn btn-success" onClick={() => {onViewChange('products')}}>
           {" "}
           <i class="bi-bag-check"></i> Return
         </button></a>
-        <button onClick={submit}>Save Order</button>
       </div>
       </>
     </div>
@@ -489,7 +447,19 @@ const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
 const App = () => {
   const [view, setView] = useState('home');
   const [cartItems, setCartItems] = useState([]);
+  const [total, setTotal] = useState(0);
+
   const [userInfo, setUserInfo] = useState({})
+  useEffect(() => {
+    fetch('http://localhost:4000/cart/all')
+      .then(res => res.json())
+      .then(data => {
+        setCartItems(data);
+        const totalPrice = data.reduce((acc, item) => acc + item.price * item.quantity, 0);
+        setTotal(totalPrice);
+      })
+      .catch(err => console.error(err));
+  })
 
 
   const handleUserChange = (event) => {

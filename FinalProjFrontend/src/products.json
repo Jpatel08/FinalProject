@@ -1,4 +1,4 @@
-{ 
+[
    {
      "_id": "1",
      "title": "Hoka Clifton 9",
@@ -8,7 +8,7 @@
      "rating": {"rate": 4.75, "count": 241},
      "image": "http://127.0.0.1:4000/images/hokashoe.jpg"
     
-   } 
+   } ,
    {
      "_id": "2",
      "title": "Asic Gel-Cumulus 35",
@@ -45,7 +45,7 @@
      "description": "Once you take a few str_ides in the Nike Air Zoom Alphafly NEXT% 2, you'll never look at your favorite pair of old racing shoes the same way again. These rocket ships are made to help shave precious time off your personal records without surrendering the foundation you need to go the full distance. ",
      "category": "Nike",
      "rating": {"rate": 5, "count": 12},
-     "image": "http://127.0.0.1:4000/images/nikeshoe1.jpeg",
+     "image": "http://127.0.0.1:4000/images/nikeshoe1.jpeg"
 
    },
    {
@@ -55,7 +55,7 @@
      "description": "With maximum cushioning to support every mile, the Invincible 3 gives you our highest level of comfort underfoot to help you stay on your feet today, tomorrow and beyond.",
      "category": "Nike",
      "rating": {"rate": 4.8, "count": 124},
-     "image": "http://127.0.0.1:4000/images/nikeshoe2.png",
+     "image": "http://127.0.0.1:4000/images/nikeshoe2.png"
 
-   },
- }
+   }
+  ]
