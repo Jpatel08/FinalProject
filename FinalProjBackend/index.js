@@ -2,20 +2,62 @@ const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
 const { Product } = require("./dataSchema"); // import the Product model
-const { CustomerInfo } = require("./customerSchema");
-// ...
 const app = express();
-
 const path = require('path');
-const bodyParser = require("body-parser");
 app.use('/images', express.static(path.join(__dirname, 'images')));
-app.use(bodyParser.json());
-
-
-
 app.use(express.json());
 app.use(cors());
 app.use(express.static("images"));
+
+
+const cartitemSchema = new mongoose.Schema({
+  _id: {type:Number},
+  title: {type:String},
+  description: {type:String},
+  price: {type:Number},
+  image: {type:String},
+  rating: {
+    rate: {type:Number},
+    count: {type:Number}
+  },
+  quantity: {type:Number}
+});
+
+// Create a model for the 'cartItems' collection
+const CartItem = mongoose.model('carts', cartitemSchema);
+
+app.post('/Cart', async (req, res) => {
+  const { _id, title, description, price, image, rating, quantity } = req.body;
+  const cartItem = await CartItem.create({
+    _id,
+    title,
+    description,
+    price,
+    image,
+    rating,
+    quantity
+  });
+  res.send(cartItem);
+});
+
+app.put('/Cart/:id', async (req, res) => {
+  const id = req.params._id;
+  const { quantity } = req.body;
+  try {
+    const cartItem = await CartItem.findByIdAndUpdate(
+      id,
+      { quantity },
+      { new: true } // Return the updated document
+    );
+    if (!cartItem) {
+      return res.status(404).send('Cart item not found');
+    }
+    res.send(cartItem);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send('Internal Server Error');
+  }
+});
 
 mongoose.connect("mongodb://127.0.0.1:27017/StoreProject", {
   dbName: "StoreProject",
@@ -44,35 +86,6 @@ app.get("/:id", async (req, resp) => {
 
 app.listen(port, () => {
   console.log(`App listening at http://${host}:${port}`);
-});
-
-app.post("/insert", async (req, res) => {
-  console.log(req.body);
-  const p_id = req.body._id;
-  const ptitle = req.body.title;
-  const pprice = req.body.price;
-  const pdescription = req.body.description;
-  const pcategory = req.body.category;
-  const prate = req.body.rating.rate;
-  const pimage = req.body.image;
-  const pcount = req.body.rating.count;
-
-  const formData = new Product({
-    _id: p_id,
-    title: ptitle,
-    price: pprice,
-    description: pdescription,
-    category: pcategory,
-    rating: { rate: prate, count: pcount },
-    image: pimage,
-  });
-  try {
-    await Product.create(formData);
-    const messageResponse = { message: `Product ${p_id} added` };
-    res.send(JSON.stringify(messageResponse));
-  } catch (err) {
-    console.log("Error while adding a new product:" + err);
-  }
 });
 
 app.delete("/delete", async (req, res) => {
@@ -113,25 +126,11 @@ app.put("/edite/:id", async (req, res) =>{
     }
   });
 
-  app.post('/customerinfo', (req, res) => {
 
-    const customerInfo = new CustomerInfo({
-      name: req.body.name,
-      email: req.body.email,
-      cardNum: req.body.cardNum,
-      address1: req.body.address1,
-      city: req.body.city,
-      state: req.body.state,
-      zipCode: req.body.zipCode,
-    });
-    
-    customerInfo.save()
-      .then((result) => {
-        console.log('Customer info saved:', result);
-        res.send(result);
-      })
-      .catch((error) => {
-        console.error('Error saving customer info:', error);
-        res.status(500).send('Error saving customer info');
-      });
+  app.get('/cartItems', async(req,res) =>{
+    const id = req.params.id;
+    const query = { _id: id };
+    const oneProduct = await CartItem.findOne(query);
+    console.log(oneProduct);
+    resp.send(oneProduct);
   });

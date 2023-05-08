@@ -7,35 +7,47 @@ import React, { useState, useEffect } from 'react';
 
 const Navbar = ({ cartItemsCount, onViewChange }) => {
   return (
-    <nav className="navbar navbar-expand-lg navbar-light"
-         style={{backgroundColor: "#ff6150"}}>
-     
-     <div className="container-fluid">
-        <a className="navbar-brand" href="/" style={{color: "white"}} 
-        onClick={()=> onViewChange('home')}>  My Store  </a>
-        
+    <nav className="navbar navbar-expand-lg navbar-light" style={{ backgroundColor: "#ff6150" }}>
+      <div className="container-fluid">
+        <button className="navbar-brand btn" style={{ color: "white" }} onClick={() => onViewChange('home')}>
+          Home
+        </button>
         <div className="collapse navbar-collapse" id="navbarNav">
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
-              <a className="nav-link active" aria-current="page" href="#"
-                 onClick={() => onViewChange('products')}
-                 style={{color: "white"}}>Products</a>
+              <button className="nav-link btn" onClick={() => onViewChange('products')} style={{ color: "white" }}>
+                Products
+              </button>
             </li>
           </ul>
-         
           <ul className="navbar-nav">
             <li className="nav-item">
-              <a className="nav-link" href="#" id="navCheckout"
-                 onClick={() => onViewChange('cart')}
-                 style={{color: "white"}}>Checkout</a>
+              <button className="nav-link btn" onClick={() => onViewChange('cart')} style={{ color: "white" }}>
+                Checkout
+              </button>
             </li>
           </ul>
-        
         </div>
       </div>
     </nav>
   );
 };
+
+const Home = () => {
+  return (
+    <div>
+      <h1>Welcome to our online store!</h1>
+      <p>Explore our collection of products and add them to your cart.</p>
+      <p>When you're ready, checkout and enter your shipping information to complete your order.</p>
+
+      <footer>
+        <p>This is an app developed by Jay Patel(jpatel02) and Dominik Chally</p>
+      </footer>
+    </div>
+
+  );
+};
+
 
 const ProductGrid = ({ onAddToCart }) => {
   const [quantities, setQuantities] = useState({});
@@ -48,7 +60,31 @@ const ProductGrid = ({ onAddToCart }) => {
       .then(data => setProducts(data))
       .catch(err => console.error(err));
   }, []);
-
+  const handleAddToCart = (product, quantity) => {
+    fetch('http://localhost:4000/Cart', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        "id":product._id,
+        "title": product.title,
+        "description":product.description,
+        "price": product.price,
+        "image":product.image,
+        "rating":product.rating,
+        "quantity": quantity,
+      })
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log('Added to cart:', data);
+        // Optionally, you can update the local cart state as well
+        onAddToCart(product, quantity);
+      })
+      .catch(err => console.error(err));
+  };
+  
   const handleIncrement = (productId) => {
     setQuantities({
       ...quantities,
@@ -91,6 +127,7 @@ const ProductGrid = ({ onAddToCart }) => {
 
   return (
     <div>
+        <br></br>
       <div className="d-flex justify-content-center mb-4">
         <input
           type="text"
@@ -114,7 +151,8 @@ const ProductGrid = ({ onAddToCart }) => {
                 <p className="card-text w"><small className="text-muted w">{product.rating.rate} ({product.rating.count})</small></p>
                 <div className="d-flex align-items-center justify-content-between">
                   <div>
-                    <button className="btn btn-primary me-2 btn-custom" onClick={() => onAddToCart({ ...product, quantity: quantities[product._id] || 0 })}>Add to Cart</button>
+                  <button className="btn btn-primary me-2 btn-custom" onClick={() => handleAddToCart(product, quantities[product._id] || 0)}>Add to Cart</button>
+
                     <span className="fs-5">{quantities[product._id] || 0}</span>
                   </div>
                   <div>
@@ -449,7 +487,7 @@ const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
   )
 }
 const App = () => {
-  const [view, setView] = useState('products');
+  const [view, setView] = useState('home');
   const [cartItems, setCartItems] = useState([]);
   const [userInfo, setUserInfo] = useState({})
 
@@ -470,28 +508,7 @@ const App = () => {
       setCartItems(updatedCartItems);
      } else {
       setCartItems([...cartItems, newItem]);
-    //   fetch("http://localhost:4000/cart", {
-    //     method: "POST",
-    //     body: JSON.stringify(newItem)
-    //   })
-    //     .then((response) => response.json())
-    //     .then((data) => {
-    //       console.log("Post a new product completed");
-    //       console.log(data);
 
-    //       setCartItems([...cartItems, data.cartItems]);
-    //     })
-    //     .catch(error => {
-    //       console.log(error);
-    //     })
-
-      // axios.post('/api/cart', newItem)
-      //   .then(response => {
-      //     setCartItems([...cartItems, response.data.cartItems]);
-      //   })
-      //   .catch(error => {
-      //     console.log(error);
-      //   })
     }
   };
   
@@ -511,9 +528,10 @@ const App = () => {
     <div class="pageBG">
       <Navbar onViewChange={handleViewChange} cartItems={cartItems} />
       <div className="container">
-        {view === 'products' && <ProductGrid onAddToCart={handleAddToCart} />}
-        {view === 'cart' && <Cart cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} total={calculateTotal()} onViewChange={handleViewChange} handleFormChange={handleUserChange} />}
-        {view === 'confirmation' && <Confimation cartItems={cartItems} total={calculateTotal()} userInfo={userInfo} onViewChange={handleViewChange} />} 
+      {view === 'home' && <Home />}
+      {view === 'products' && <ProductGrid onAddToCart={handleAddToCart} />}
+      {view === 'cart' && <Cart cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} total={calculateTotal()} onViewChange={handleViewChange} handleFormChange={handleUserChange} />}
+      {view === 'confirmation' && <Confimation cartItems={cartItems} total={calculateTotal()} userInfo={userInfo} onViewChange={handleViewChange} />} 
       </div>
     </div>
   );
