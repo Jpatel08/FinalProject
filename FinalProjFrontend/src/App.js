@@ -2,9 +2,21 @@ import logo from './logo.svg';
 import './App.css';
 import 'bootstrap/dist/css/bootstrap.css';
 import React, { useState, useEffect } from 'react';
-//import axios from 'axios';
+import Select from 'react-select'//import axios from 'axios';
 
-
+const sizes = [
+  { value: '7', label: 'Size 7' },
+  { value: '7.5', label: 'Size 7.5' },
+  { value: '8', label: 'Size 8' },
+  { value: '8.5', label: 'Size 8.5' },
+  { value: '9', label: 'Size 9' },
+  { value: '9.5', label: 'Size 9.5' },
+  { value: '10', label: 'Size 10' },
+  { value: '10.5', label: 'Size 10.5' },
+  { value: '11', label: 'Size 11' },
+  { value: '12', label: 'Size 12' },
+  { value: '13', label: 'Size 13' },
+]
 
 const Navbar = ({ cartItemsCount, onViewChange }) => {
   return (
@@ -17,7 +29,7 @@ const Navbar = ({ cartItemsCount, onViewChange }) => {
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
               <button className="nav-link btn" onClick={() => onViewChange('products')} style={{ color: "white" }}>
-                Products
+                Shoes
               </button>
             </li>
           </ul>
@@ -34,16 +46,15 @@ const Navbar = ({ cartItemsCount, onViewChange }) => {
   );
 };
 
-const Home = () => {
+const Home = ({ cartItemsCount, handleViewChange }) => {
   return (
-    <div>
-      <h1>Welcome to our online store!</h1>
-      <p>Explore our collection of products and add them to your cart.</p>
-      <p>When you're ready, checkout and enter your shipping information to complete your order.</p>
-
-      <footer>
-        <p>This is an app developed by Jay Patel(jpatel02) and Dominik Chally</p>
-      </footer>
+    <div class="homepage">
+      <body class="homepage">
+      <div class="container">
+    <h1 class="Heading">Run faster.  Go Farther.</h1>
+    <h2 class="subtext"> View our selection of performance sneakers to<br></br>help you go the distance.</h2>
+  </div>
+      </body>
     </div>
 
   );
@@ -54,14 +65,14 @@ const ProductGrid = ({ onAddToCart },cartItems) => {
   const [quantities, setQuantities] = useState({});
   const [searchTerm, setSearchTerm] = useState('');
   const [products, setProducts] = useState([]);
-
+ const [selection,setSelection] = useState([null]);
   useEffect(() => {
     fetch('http://localhost:4000/')
       .then(res => res.json())
       .then(data => setProducts(data))
       .catch(err => console.error(err));
   }, []);
-  const handleAddToCart = (product, quantity) => {
+  const handleAddToCart = (product, quantity,selection) => {
     fetch('http://localhost:4000/cart/all')
       .then(res => res.json())
       .then(data => {
@@ -92,6 +103,7 @@ const ProductGrid = ({ onAddToCart },cartItems) => {
               "image":product.image,
               "rating":product.rating,
               "quantity": quantity,
+              "size": selection,
             })
           })
             .then(res => res.json())
@@ -101,6 +113,10 @@ const ProductGrid = ({ onAddToCart },cartItems) => {
       .catch(err => console.error(err));
   };
   
+
+  const handleSelectChange = (option) => {
+    setSelection(option ? option.value : null);
+  };
   
   
   const handleIncrement = (productId) => {
@@ -143,6 +159,7 @@ const ProductGrid = ({ onAddToCart },cartItems) => {
   }
   
 
+
   return (
     <div>
         <br></br>
@@ -153,23 +170,30 @@ const ProductGrid = ({ onAddToCart },cartItems) => {
           placeholder="Search products"
           value={searchTerm}
           onChange={(event) => setSearchTerm(event.target.value)}
+
         />
         <button className="btn btn-primary searchBar">Search</button>
       </div>
-
+      <label> Select a size
+      <Select
+            options={sizes}
+            value={selection}
+            onChange={handleSelectChange}
+              />
+              </label>
       <div className="row row-cols-1 row-cols-md-3 g-4">
         {filteredProducts.map((product) => (
           <div className="col" key={product._id}>
             <div className="card">
               <img src={product.image} className="card-img-top" alt={product.title} />
-              <div className="cardBG">
+              <div className="cardBG"> 
                 <h5 className="card-title w">{product.title}</h5>
                 <p className="card-text w">{product.description}</p>
                 <p className="card-text w">${product.price}</p>
                 <p className="card-text w"><small className="text-muted w">{product.rating.rate} ({product.rating.count})</small></p>
                 <div className="d-flex align-items-center justify-content-between">
                   <div>
-                  <button className="btn btn-primary me-2 btn-custom" onClick={() => handleAddToCart(product, quantities[product._id] || 0)}>Add to Cart</button>
+                  <button className="btn btn-primary me-2 btn-custom" onClick={() => handleAddToCart(product, quantities[product._id], selection || 0)}>Add to Cart</button>
 
                     <span className="fs-5">{quantities[product._id] || 0}</span>
                   </div>
@@ -276,6 +300,7 @@ const Cart = ({ onRemoveFromCart, onViewChange, handleFormChange }) => {
                 <th scope="col">Product</th>
                 <th scope="col">Price</th>
                 <th scope="col">Quantity</th>
+                <th scope="col">Size</th>
                 <th scope="col"></th>
               </tr>
             </thead>
@@ -285,6 +310,7 @@ const Cart = ({ onRemoveFromCart, onViewChange, handleFormChange }) => {
                   <td>{item.title}</td>
                   <td>${item.price}</td>
                   <td>{item.quantity}</td>
+                  <td>{item.size}</td>
                   <td>
                     <button className="btn btn-danger" onClick={() => deleteFromCart(item._id)}>Remove</button>
                   </td>
@@ -411,6 +437,7 @@ const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
     <div className="container mt-3">
       <h1>Confimation</h1>
       <>
+      <br></br>
       <table className="table">
       <thead>
         <tr>
@@ -432,7 +459,8 @@ const Confimation = ({cartItems, total, userInfo, onViewChange}) => {
       </table>
       <div className="total-price"><b>Total:</b> ${total}</div>
       <div>
-        <h4>User Info</h4>
+        <br></br>
+        <h2>User Info</h2>
         <>
         <p>Full Name:{userInfo.inputName} <br></br> Email Address: {userInfo.inputEmail4} <br></br>Card Info: {userInfo.inputCard} <br></br>Given Address: {userInfo.inputAddress}</p></>
         <a href="/"><button type="submit" class="btn btn-success" onClick={() => {onViewChange('products')}}>
@@ -498,7 +526,7 @@ const App = () => {
     <div class="pageBG">
       <Navbar onViewChange={handleViewChange} cartItems={cartItems} />
       <div className="container">
-      {view === 'home' && <Home />}
+      {view === 'home' && <Home onViewChange={handleViewChange} />}
       {view === 'products' && <ProductGrid onAddToCart={handleAddToCart} />}
       {view === 'cart' && <Cart cartItems={cartItems} onRemoveFromCart={handleRemoveFromCart} total={calculateTotal()} onViewChange={handleViewChange} handleFormChange={handleUserChange} />}
       {view === 'confirmation' && <Confimation cartItems={cartItems} total={calculateTotal()} userInfo={userInfo} onViewChange={handleViewChange} />} 

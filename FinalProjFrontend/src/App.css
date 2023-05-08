@@ -87,3 +87,45 @@ button.searchCstm:hover{
   color: #4A9EBA;
 }
 
+.Heading{
+  font-size: 100px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 50vh;
+  color: white;
+  animation: fadeInAnimation ease 3s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+}
+.subtext{
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  animation: fadeInAnimation ease 2.5s;
+    animation-iteration-count: 1;
+    animation-fill-mode: forwards;
+
+}
+.homepage{
+  background-size: cover;
+  background-image: url(./image/homepageBG.jpg)
+  
+}
+.total-price{
+  font-weight: bolder;
+  font-size: larger;
+}
+
+
+@keyframes fadeInAnimation {
+  0% {
+      opacity: 0;
+  }
+  100% {
+      opacity: 1;
+   }
+}

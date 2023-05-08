@@ -10,6 +10,7 @@ const cartitemSchema = new mongoose.Schema({
     count: {type:Number}
   },
   quantity: {type:Number},
+  size: {type:Number},
   __v: {type:Number}
 },
 { collection: "carts",versionKey: false  }

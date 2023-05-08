@@ -24,7 +24,7 @@ const port = process.env.PORT || 4000;
 const host = "localhost";
 
 app.post('/cart/create', async (req, res) => {
-  const { _id, title, description, price, image, rating, quantity } = req.body;
+  const { _id, title, description, price, image, rating, quantity, size } = req.body;
   const cartItem = await CartItem.create({
     _id,
     title,
@@ -32,7 +32,8 @@ app.post('/cart/create', async (req, res) => {
     price,
     image,
     rating,
-    quantity
+    quantity,
+    size,
   });
   res.send(cartItem);
 });
